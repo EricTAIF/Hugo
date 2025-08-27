@@ -1,0 +1,49 @@
+# Audio2NoteSheets - Complete Audio to Piano Transcription System
+# Install with: pip install -r requirements.txt
+
+# Core audio processing and transcription
+demucs>=4.0.0
+basic-pitch>=0.4.0
+pretty_midi>=0.2.10
+librosa>=0.10.1
+soundfile>=0.12.1
+numpy>=1.22
+mido>=1.3.0
+
+# Music notation and analysis  
+music21>=9.1.0
+
+# Machine Learning / Deep Learning
+tensorflow>=2.8.0
+torch>=1.11.0
+torchaudio>=0.11.0
+
+# Web servers and APIs
+flask>=2.3.0
+fastapi>=0.100.0
+uvicorn>=0.23.0
+pydantic>=2.0.0
+werkzeug>=2.3.0
+
+# HTTP requests and data processing
+requests>=2.28.0
+scipy>=1.9.0
+
+# Optional transcription engines
+crepe>=0.0.12
+piano_transcription_inference>=0.1.0
+spleeter>=2.3.0
+
+# Audio file handling
+ffmpeg-python>=0.2.0
+
+# Utilities (most are built-in but included for clarity)
+pathlib2>=2.3.7; python_version<"3.4"
+argparse>=1.4.0; python_version<"2.7"
+
+# CORS support for web APIs
+flask-cors>=4.0.0
+
+# Note: Install PyTorch separately from pytorch.org to match your system (CPU or CUDA)
+# For CPU: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+# For CUDA: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118

@@ -1,0 +1,24 @@
+# Audio2NoteSheets - Development Dependencies
+# Install with: pip install -r requirements.txt -r requirements-dev.txt
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Code quality
+flake8>=5.0.0
+black>=22.0.0
+isort>=5.10.0
+
+# Development utilities
+ipython>=8.0.0
+jupyter>=1.0.0
+matplotlib>=3.5.0
+
+# Additional transcription engines for testing
+crepe>=0.0.12
+piano_transcription_inference>=0.1.0
+
+# Performance profiling
+memory-profiler>=0.60.0
+line-profiler>=4.0.0

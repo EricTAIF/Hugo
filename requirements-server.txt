@@ -1,0 +1,19 @@
+# Audio2NoteSheets - Server Dependencies
+# For running the web UI and API servers
+# Install with: pip install -r requirements.txt -r requirements-server.txt
+
+# Web frameworks
+flask>=2.3.0
+flask-cors>=4.0.0
+fastapi>=0.100.0
+uvicorn>=0.23.0
+pydantic>=2.0.0
+werkzeug>=2.3.0
+
+# Additional server utilities
+gunicorn>=21.0.0
+python-multipart>=0.0.6
+
+# Security
+python-jose>=3.3.0
+passlib>=1.7.4
