@@ -1,0 +1,22 @@
+{
+    "phraseDuration": 12000,
+    "phraseOverlap": 2000,
+    "minNotesPerSec": 4.0,
+    "maxNotesPerSec": 8.0,
+    "veryDenseRatio": 0.25,
+    "denseRatio": 0.35,
+    "mediumRatio": 0.50,
+    "sparseRatio": 0.70,
+    "veryShortPenalty": 20,
+    "shortPenalty": 10,
+    "minDuration": 150,
+    "goodDuration": 500,
+    "legatoEnabled": true,
+    "legatoGapThreshold": 300,
+    "minNoteDuration": 200,
+    "sustainedHarmony": true,
+    "vocalsWeight": 1.0,
+    "pianoWeight": 0.8,
+    "guitarWeight": 0.6,
+    "bassWeight": 0.7
+}

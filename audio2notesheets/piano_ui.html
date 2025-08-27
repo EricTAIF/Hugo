@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent Piano Arrangement Tuner</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        
+        .section h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+        
+        .control-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .control {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .control label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #34495e;
+        }
+        
+        .control input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .control .value-display {
+            background: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .control .description {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .song-selector {
+            margin-bottom: 20px;
+        }
+        
+        .song-selector select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .generate-btn {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            margin: 20px 0;
+            transition: transform 0.2s;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+        
+        .generate-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .output {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .preset-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .preset-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .preset-btn:hover {
+            background: #c0392b;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.processing {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎹 Intelligent Piano Arrangement Tuner</h1>
+        <p class="subtitle">Fine-tune parameters to create the perfect piano arrangement</p>
+        
+        <div class="section">
+            <h3>🎵 Song Selection</h3>
+            <div class="song-selector">
+                <label for="songSelect">Choose a song:</label>
+                <select id="songSelect"></select>
+                <div style="margin-top:10px">
+                    <input type="file" id="uploadInput" accept="audio/*" />
+                    <button class="preset-btn" onclick="uploadSong()">Upload & Prepare</button>
+                    <button class="preset-btn" onclick="testEnhancements()" style="background: #27ae60;">🔬 Test Enhancements</button>
+                    <span id="uploadStatus" style="margin-left:10px;color:#34495e"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>🎯 Enhanced BPM Detection (2025)</h3>
+            <div class="control-group">
+                <div class="control">
+                    <label for="enableEnhancedBPM">Enable Enhanced BPM Detection</label>
+                    <input type="checkbox" id="enableEnhancedBPM" checked>
+                    <div class="description">Use advanced multi-algorithm BPM detection instead of basic 120 BPM fallback</div>
+                </div>
+                <div class="control">
+                    <label for="bpmConfidenceThreshold">BPM Confidence Threshold</label>
+                    <input type="range" id="bpmConfidenceThreshold" min="0.1" max="1.0" value="0.7" step="0.1">
+                    <div class="value-display" id="bpmConfidenceThresholdValue">0.7</div>
+                    <div class="description">Minimum confidence required for BPM estimate (lower = more permissive)</div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control">
+                    <label for="enhancedNoteProcessing">Enhanced Note Processing</label>
+                    <input type="checkbox" id="enhancedNoteProcessing" checked>
+                    <div class="description">Apply harmonic analysis and confidence filtering to note extraction</div>
+                </div>
+                <div class="control">
+                    <label for="noteConfidenceThreshold">Note Confidence Threshold</label>
+                    <input type="range" id="noteConfidenceThreshold" min="0.1" max="0.9" value="0.3" step="0.1">
+                    <div class="value-display" id="noteConfidenceThresholdValue">0.3</div>
+                    <div class="description">Minimum confidence to keep a detected note</div>
+                </div>
+            </div>
+            <div id="bpmDetectionResults" style="margin-top: 15px; padding: 10px; background: #ecf0f1; border-radius: 5px; display: none;">
+                <h4 style="margin: 0 0 10px 0;">BPM Detection Results:</h4>
+                <div id="bmpResultsContent"></div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>🎼 Enhanced Transcription Methods (2025)</h3>
+            <div class="control-group">
+                <div class="control">
+                    <label for="transcriptionMethod">Transcription Method</label>
+                    <select id="transcriptionMethod">
+                        <option value="current">Current System (Stem + Arrangement)</option>
+                        <option value="enhanced_basic_pitch">Enhanced Basic Pitch (Full Song)</option>
+                        <option value="piano_inference">Piano Transcription Inference (Piano-Specific)</option>
+                    </select>
+                    <div class="description">Choose the transcription approach for note detection</div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control">
+                    <label for="enhancedQuantization">Enhanced Quantization</label>
+                    <input type="checkbox" id="enhancedQuantization" checked>
+                    <div class="description">Apply piano-friendly quantization to musical grid</div>
+                </div>
+                <div class="control">
+                    <label for="leftRightSplit">Left/Right Hand Split</label>
+                    <input type="checkbox" id="leftRightSplit">
+                    <div class="description">Create separate tracks for left and right hands (Enhanced Basic Pitch only)</div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control">
+                    <label for="pianoOptimized">Piano-Optimized Processing</label>
+                    <input type="checkbox" id="pianoOptimized" checked>
+                    <div class="description">Apply piano-specific post-processing (range clamping, velocity normalization)</div>
+                </div>
+            </div>
+            <div id="transcriptionInfo" style="margin-top: 15px; padding: 10px; background: #e8f4fd; border-radius: 5px;">
+                <h4 style="margin: 0 0 10px 0;">📊 Transcription Method Comparison:</h4>
+                <div style="font-size: 0.9em; line-height: 1.5;">
+                    <strong>Current System:</strong> 103 notes, 0 E4 melody, accurate tempo (137 BPM)<br>
+                    <strong>Enhanced Basic Pitch:</strong> 2,103 notes, 355 E4 melody, rich content (189 BPM)<br>
+                    <strong>Piano Inference:</strong> 2,419 notes, 334 E4 melody, piano-specific (161 BPM)
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>🎛️ Quick Presets</h3>
+            <div class="preset-buttons">
+                <button class="preset-btn" onclick="loadPreset('minimal')">Minimal (200-400 notes)</button>
+                <button class="preset-btn" onclick="loadPreset('balanced')">Balanced (400-800 notes)</button>
+                <button class="preset-btn" onclick="loadPreset('rich')">Rich (800-1200 notes)</button>
+                <button class="preset-btn" onclick="loadPreset('full')">Full (1200+ notes)</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🧠 AI Arranger (optional)</h3>
+            <div class="control-group">
+                <div class="control">
+                    <label><input type="checkbox" id="aiEnabled"> Enable AI Arranger</label>
+                    <div class="description">Generate continuation from a primer and blend into the result</div>
+                </div>
+                <div class="control">
+                    <label for="aiModel">Model</label>
+                    <select id="aiModel">
+                        <option value="music_transformer">Music Transformer (Magenta)</option>
+                        <option value="markov">Simple Markov (fallback)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control">
+                    <label for="aiPrimerSource">Primer Source</label>
+                    <select id="aiPrimerSource">
+                        <option value="context">Context intro</option>
+                        <option value="vocals">Vocals melody</option>
+                        <option value="first_phrase">First phrase</option>
+                    </select>
+                </div>
+                <div class="control">
+                    <label for="aiBars">Bars to Generate</label>
+                    <input type="number" id="aiBars" value="8" min="2" max="64">
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control">
+                    <label for="aiTemperature">Temperature</label>
+                    <input type="number" id="aiTemperature" value="1.0" step="0.1" min="0.1" max="2.0">
+                </div>
+                <div class="control">
+                    <label for="aiBeamSize">Beam Size</label>
+                    <input type="number" id="aiBeamSize" value="1" min="1" max="8">
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control">
+                    <label for="aiBlendMode">Blend Mode</label>
+                    <select id="aiBlendMode">
+                        <option value="replace_intro">Replace intro</option>
+                        <option value="overlay">Overlay</option>
+                        <option value="append">Append</option>
+                    </select>
+                </div>
+                <div class="control">
+                    <label><input type="checkbox" id="useGPU" checked> Use GPU if available</label>
+                    <div class="description">Requires GPU/driver and model support</div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control">
+                    <label for="aiCheckpoint">Checkpoint Path (optional)</label>
+                    <input type="text" id="aiCheckpoint" placeholder="/path/to/music_transformer.ckpt">
+                    <div class="description">If empty, server will use its configured default if available</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🎚️ Arrangement Source</h3>
+            <div class="control-group">
+                <div class="control">
+                    <label>Mode</label>
+                    <div>
+                        <label><input type="radio" name="arrMode" value="combined" checked onchange="toggleStemSelect()"> Combined (all stems)</label>
+                    </div>
+                    <div>
+                        <label><input type="radio" name="arrMode" value="single" onchange="toggleStemSelect()"> Single stem only</label>
+                    </div>
+                    <div class="description">Choose whether to combine stems or arrange a single instrument.</div>
+                </div>
+                <div class="control">
+                    <label for="stemSelect">Single Stem</label>
+                    <select id="stemSelect" disabled>
+                        <option value="vocals">vocals</option>
+                        <option value="piano">piano</option>
+                        <option value="guitar">guitar</option>
+                        <option value="bass">bass</option>
+                        <option value="other">other</option>
+                        <option value="drums">drums</option>
+                    </select>
+                    <div class="description">Pick the stem for single-stem mode</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🎼 Preview & Download</h3>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <button class="preset-btn" onclick="previewArrangement()" id="playBtn">▶ Preview</button>
+                <button class="preset-btn" onclick="stopPlayback()" id="stopBtn" style="background:#e74c3c">⏹ Stop</button>
+                <button class="preset-btn" onclick="toggleQuality()" id="qualityBtn">🎵 HQ Audio</button>
+                <a id="downloadLink" class="preset-btn" href="#" download>⬇ Download MIDI</a>
+                <span id="bpmInfo" style="align-self:center;color:#2c3e50"></span>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
+                <label style="font-size:14px">Preview Duration:</label>
+                <select id="previewDuration" style="padding:5px">
+                    <option value="15">15 seconds</option>
+                    <option value="30" selected>30 seconds</option>
+                    <option value="60">1 minute</option>
+                    <option value="120">2 minutes</option>
+                    <option value="0">Full song</option>
+                </select>
+                <label style="font-size:14px;margin-left:15px">Volume:</label>
+                <input type="range" id="volumeSlider" min="0" max="100" value="40" style="width:100px">
+                <span id="volumeDisplay" style="font-size:12px;color:#666">40%</span>
+            </div>
+            <div style="margin-top:15px">
+                <canvas id="pianoRoll" width="1100" height="240" style="width:100%;border:1px solid #e0e0e0;background:#fff"></canvas>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🧭 Context (MIDI/MusicXML)</h3>
+            <div class="control-group">
+                <div class="control">
+                    <label for="contextFile">Upload Context File</label>
+                    <input type="file" id="contextFile" accept=".mid,.midi,.musicxml,.xml" />
+                    <button class="preset-btn" onclick="uploadContext()">Upload Context</button>
+                    <div class="description">Provide a reference to guide tempo, harmony, or the intro</div>
+                    <div id="contextStatus" style="margin-top:6px;color:#34495e"></div>
+                </div>
+                <div class="control">
+                    <label>Use Context For</label>
+                    <label><input type="checkbox" id="useContextTempo" checked> Tempo</label>
+                    <label><input type="checkbox" id="useContextHarmony" checked> Harmony</label>
+                    <label><input type="checkbox" id="useContextIntro"> Intro</label>
+                    <div class="description">Intro length (seconds): <input type="number" id="contextIntroSeconds" value="8" min="1" max="60" style="width:80px"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>⏱️ Phrase Detection</h3>
+            <div class="control-group">
+                <div class="control">
+                    <label for="phraseDuration">Phrase Duration (seconds)</label>
+                    <input type="range" id="phraseDuration" min="5" max="20" value="12" step="1">
+                    <div class="value-display" id="phraseDurationValue">12</div>
+                    <div class="description">How long each musical phrase should be</div>
+                </div>
+                <div class="control">
+                    <label for="phraseOverlap">Phrase Overlap (seconds)</label>
+                    <input type="range" id="phraseOverlap" min="0" max="5" value="2" step="0.5">
+                    <div class="value-display" id="phraseOverlapValue">2</div>
+                    <div class="description">Overlap between consecutive phrases</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>🎵 Note Density</h3>
+            <div class="control-group">
+                <div class="control">
+                    <label for="minNotesPerSec">Min Notes/Second</label>
+                    <input type="range" id="minNotesPerSec" min="1" max="10" value="4" step="0.5">
+                    <div class="value-display" id="minNotesPerSecValue">4</div>
+                    <div class="description">Minimum note density for playability</div>
+                </div>
+                <div class="control">
+                    <label for="maxNotesPerSec">Max Notes/Second</label>
+                    <input type="range" id="maxNotesPerSec" min="3" max="15" value="8" step="0.5">
+                    <div class="value-display" id="maxNotesPerSecValue">8</div>
+                    <div class="description">Maximum note density to avoid clutter</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>🎯 Note Selection Ratios</h3>
+            <div class="control-group">
+                <div class="control">
+                    <label for="veryDenseRatio">Very Dense Phrases (%)</label>
+                    <input type="range" id="veryDenseRatio" min="10" max="90" value="25" step="5">
+                    <div class="value-display" id="veryDenseRatioValue">25%</div>
+                    <div class="description">% of notes to keep in very dense sections</div>
+                </div>
+                <div class="control">
+                    <label for="denseRatio">Dense Phrases (%)</label>
+                    <input type="range" id="denseRatio" min="15" max="95" value="35" step="5">
+                    <div class="value-display" id="denseRatioValue">35%</div>
+                    <div class="description">% of notes to keep in dense sections</div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control">
+                    <label for="mediumRatio">Medium Phrases (%)</label>
+                    <input type="range" id="mediumRatio" min="20" max="100" value="50" step="5">
+                    <div class="value-display" id="mediumRatioValue">50%</div>
+                    <div class="description">% of notes to keep in medium sections</div>
+                </div>
+                <div class="control">
+                    <label for="sparseRatio">Sparse Phrases (%)</label>
+                    <input type="range" id="sparseRatio" min="30" max="100" value="70" step="5">
+                    <div class="value-display" id="sparseRatioValue">70%</div>
+                    <div class="description">% of notes to keep in sparse sections</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>⏰ Duration Filtering</h3>
+            <div class="control-group">
+                <div class="control">
+                    <label for="veryShortPenalty">Very Short Note Penalty</label>
+                    <input type="range" id="veryShortPenalty" min="0" max="50" value="20" step="5">
+                    <div class="value-display" id="veryShortPenaltyValue">-20</div>
+                    <div class="description">Penalty for notes < 150ms (higher = fewer short notes)</div>
+                </div>
+                <div class="control">
+                    <label for="shortPenalty">Short Note Penalty</label>
+                    <input type="range" id="shortPenalty" min="0" max="30" value="10" step="2">
+                    <div class="value-display" id="shortPenaltyValue">-10</div>
+                    <div class="description">Penalty for notes 150-300ms</div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control">
+                    <label for="minDuration">Minimum Duration (ms)</label>
+                    <input type="range" id="minDuration" min="50" max="500" value="150" step="25">
+                    <div class="value-display" id="minDurationValue">150ms</div>
+                    <div class="description">Notes shorter than this get heavy penalty</div>
+                </div>
+                <div class="control">
+                    <label for="goodDuration">Good Duration (ms)</label>
+                    <input type="range" id="goodDuration" min="200" max="1000" value="500" step="50">
+                    <div class="value-display" id="goodDurationValue">500ms</div>
+                    <div class="description">Notes longer than this get bonus points</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>🎵 Smoothness & Legato</h3>
+            <div class="control-group">
+                <div class="control">
+                    <label for="legatoEnabled">Enable Legato Connections</label>
+                    <input type="checkbox" id="legatoEnabled" checked>
+                    <div class="description">Connect notes smoothly to reduce choppiness</div>
+                </div>
+                <div class="control">
+                    <label for="legatoGapThreshold">Legato Gap Threshold (ms)</label>
+                    <input type="range" id="legatoGapThreshold" min="100" max="500" value="300" step="50">
+                    <div class="value-display" id="legatoGapThresholdValue">300ms</div>
+                    <div class="description">Maximum gap to fill with legato connections</div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control">
+                    <label for="minNoteDuration">Minimum Note Duration (ms)</label>
+                    <input type="range" id="minNoteDuration" min="100" max="400" value="200" step="25">
+                    <div class="value-display" id="minNoteDurationValue">200ms</div>
+                    <div class="description">Extend very short notes for smoother playback</div>
+                </div>
+                <div class="control">
+                    <label for="sustainedHarmony">Sustained Harmony</label>
+                    <input type="checkbox" id="sustainedHarmony" checked>
+                    <div class="description">Add sustained background harmonies for continuity</div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control">
+                    <label for="quantizeGrid">Quantize Grid</label>
+                    <select id="quantizeGrid">
+                        <option value="none">None</option>
+                        <option value="1/8">1/8</option>
+                        <option value="1/16" selected>1/16</option>
+                    </select>
+                    <div class="description">Snap note starts/ends to a rhythmic grid</div>
+                </div>
+                <div class="control">
+                    <label for="mergeGapMs">Merge Gap (ms)</label>
+                    <input type="number" id="mergeGapMs" value="80" min="0" max="300">
+                    <div class="description">Merge repeated notes separated by ≤ this gap</div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control">
+                    <label><input type="checkbox" id="sustainPedal" checked> Use Sustain Pedal</label>
+                    <div class="description">Add CC64 pedaling over chord groups</div>
+                </div>
+                <div class="control">
+                    <label for="pedalWindowMs">Pedal Window (ms)</label>
+                    <input type="number" id="pedalWindowMs" value="0" min="0" max="2000">
+                    <div class="description">0=auto (~3/4 beat), otherwise custom grouping window</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>🎼 Part Importance Weights</h3>
+            <div class="control-group">
+                <div class="control">
+                    <label for="vocalsWeight">Vocals Weight</label>
+                    <input type="range" id="vocalsWeight" min="0.1" max="2.0" value="1.0" step="0.1">
+                    <div class="value-display" id="vocalsWeightValue">1.0</div>
+                    <div class="description">Importance of vocal melody</div>
+                </div>
+                <div class="control">
+                    <label for="pianoWeight">Piano Weight</label>
+                    <input type="range" id="pianoWeight" min="0.1" max="2.0" value="0.8" step="0.1">
+                    <div class="value-display" id="pianoWeightValue">0.8</div>
+                    <div class="description">Importance of original piano part</div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control">
+                    <label for="guitarWeight">Guitar Weight</label>
+                    <input type="range" id="guitarWeight" min="0.1" max="2.0" value="0.6" step="0.1">
+                    <div class="value-display" id="guitarWeightValue">0.6</div>
+                    <div class="description">Importance of guitar harmony</div>
+                </div>
+                <div class="control">
+                    <label for="bassWeight">Bass Weight</label>
+                    <input type="range" id="bassWeight" min="0.1" max="2.0" value="0.7" step="0.1">
+                    <div class="value-display" id="bassWeightValue">0.7</div>
+                    <div class="description">Importance of bass line</div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="generate-btn" onclick="generateArrangement()" id="generateBtn">
+            🎹 Generate Piano Arrangement
+        </button>
+        
+        <div id="status"></div>
+        
+        <div class="section">
+            <h3>📊 Output</h3>
+            <div id="output" class="output">Ready to generate arrangement...</div>
+        </div>
+    </div>
+
+    <script>
+        // Update value displays
+        function updateValueDisplays() {
+            const controls = [
+                'phraseDuration', 'phraseOverlap', 'minNotesPerSec', 'maxNotesPerSec',
+                'veryDenseRatio', 'denseRatio', 'mediumRatio', 'sparseRatio',
+                'veryShortPenalty', 'shortPenalty', 'minDuration', 'goodDuration',
+                'legatoGapThreshold', 'minNoteDuration',
+                'vocalsWeight', 'pianoWeight', 'guitarWeight', 'bassWeight',
+                'bpmConfidenceThreshold', 'noteConfidenceThreshold'
+            ];
+            
+            controls.forEach(id => {
+                const input = document.getElementById(id);
+                const display = document.getElementById(id + 'Value');
+                
+                input.oninput = function() {
+                    let value = this.value;
+                    if (id.includes('Ratio')) {
+                        display.textContent = value + '%';
+                    } else if (id.includes('Penalty')) {
+                        display.textContent = '-' + value;
+                    } else if (id.includes('Duration') && id !== 'phraseDuration' && id !== 'phraseOverlap') {
+                        display.textContent = value + 'ms';
+                    } else if (id.includes('Weight')) {
+                        display.textContent = parseFloat(value).toFixed(1);
+                    } else if (id.includes('Threshold')) {
+                        display.textContent = parseFloat(value).toFixed(1);
+                    } else {
+                        display.textContent = value;
+                    }
+                };
+                input.oninput(); // Initialize display
+            });
+        }
+        
+        // Load presets
+        function loadPreset(preset) {
+            const presets = {
+                minimal: {
+                    phraseDuration: 15,
+                    phraseOverlap: 1,
+                    minNotesPerSec: 2,
+                    maxNotesPerSec: 4,
+                    veryDenseRatio: 15,
+                    denseRatio: 20,
+                    mediumRatio: 30,
+                    sparseRatio: 50,
+                    veryShortPenalty: 30,
+                    shortPenalty: 15,
+                    minDuration: 200,
+                    goodDuration: 600,
+                    legatoGapThreshold: 400,
+                    minNoteDuration: 300
+                },
+                balanced: {
+                    phraseDuration: 12,
+                    phraseOverlap: 2,
+                    minNotesPerSec: 4,
+                    maxNotesPerSec: 8,
+                    veryDenseRatio: 25,
+                    denseRatio: 35,
+                    mediumRatio: 50,
+                    sparseRatio: 70,
+                    veryShortPenalty: 20,
+                    shortPenalty: 10,
+                    minDuration: 150,
+                    goodDuration: 500,
+                    legatoGapThreshold: 300,
+                    minNoteDuration: 200
+                },
+                rich: {
+                    phraseDuration: 10,
+                    phraseOverlap: 3,
+                    minNotesPerSec: 6,
+                    maxNotesPerSec: 12,
+                    veryDenseRatio: 40,
+                    denseRatio: 55,
+                    mediumRatio: 70,
+                    sparseRatio: 85,
+                    veryShortPenalty: 15,
+                    shortPenalty: 5,
+                    minDuration: 100,
+                    goodDuration: 400,
+                    legatoGapThreshold: 250,
+                    minNoteDuration: 150
+                },
+                full: {
+                    phraseDuration: 8,
+                    phraseOverlap: 4,
+                    minNotesPerSec: 8,
+                    maxNotesPerSec: 15,
+                    veryDenseRatio: 60,
+                    denseRatio: 75,
+                    mediumRatio: 85,
+                    sparseRatio: 95,
+                    veryShortPenalty: 5,
+                    shortPenalty: 2,
+                    minDuration: 75,
+                    goodDuration: 300,
+                    legatoGapThreshold: 200,
+                    minNoteDuration: 100
+                }
+            };
+            
+            const config = presets[preset];
+            if (config) {
+                Object.keys(config).forEach(key => {
+                    const input = document.getElementById(key);
+                    if (input) {
+                        input.value = config[key];
+                        input.oninput();
+                    }
+                });
+                showStatus('Loaded ' + preset + ' preset', 'success');
+            }
+        }
+        
+        // Show status messages
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    status.textContent = '';
+                    status.className = '';
+                }, 3000);
+            }
+        }
+        
+        // Generate arrangement
+        async function generateArrangement() {
+            const btn = document.getElementById('generateBtn');
+            const output = document.getElementById('output');
+            
+            btn.disabled = true;
+            btn.textContent = '🎵 Generating...';
+            showStatus('Generating piano arrangement...', 'processing');
+            
+            // Collect parameters
+            const params = {
+                song: document.getElementById('songSelect').value,
+                arrangementMode: (document.querySelector('input[name="arrMode"]:checked')||{}).value || 'combined',
+                stem: document.getElementById('stemSelect').value,
+                phraseDuration: parseInt(document.getElementById('phraseDuration').value) * 1000,
+                phraseOverlap: parseInt(document.getElementById('phraseOverlap').value) * 1000,
+                minNotesPerSec: parseFloat(document.getElementById('minNotesPerSec').value),
+                maxNotesPerSec: parseFloat(document.getElementById('maxNotesPerSec').value),
+                veryDenseRatio: parseFloat(document.getElementById('veryDenseRatio').value) / 100,
+                denseRatio: parseFloat(document.getElementById('denseRatio').value) / 100,
+                mediumRatio: parseFloat(document.getElementById('mediumRatio').value) / 100,
+                sparseRatio: parseFloat(document.getElementById('sparseRatio').value) / 100,
+                veryShortPenalty: parseInt(document.getElementById('veryShortPenalty').value),
+                shortPenalty: parseInt(document.getElementById('shortPenalty').value),
+                minDuration: parseInt(document.getElementById('minDuration').value),
+                goodDuration: parseInt(document.getElementById('goodDuration').value),
+                legatoEnabled: document.getElementById('legatoEnabled').checked,
+                legatoGapThreshold: parseInt(document.getElementById('legatoGapThreshold').value),
+                minNoteDuration: parseInt(document.getElementById('minNoteDuration').value),
+                // smoothing additions
+                quantizeGrid: document.getElementById('quantizeGrid').value,
+                mergeGapMs: parseInt(document.getElementById('mergeGapMs').value),
+                sustainPedal: document.getElementById('sustainPedal').checked,
+                pedalWindowMs: (parseInt(document.getElementById('pedalWindowMs').value) || undefined),
+                sustainedHarmony: document.getElementById('sustainedHarmony').checked,
+                vocalsWeight: parseFloat(document.getElementById('vocalsWeight').value),
+                pianoWeight: parseFloat(document.getElementById('pianoWeight').value),
+                guitarWeight: parseFloat(document.getElementById('guitarWeight').value),
+                bassWeight: parseFloat(document.getElementById('bassWeight').value),
+                
+                // Enhanced 2025 parameters
+                enableEnhancedBPM: document.getElementById('enableEnhancedBPM').checked,
+                bpmConfidenceThreshold: parseFloat(document.getElementById('bpmConfidenceThreshold').value),
+                enhancedNoteProcessing: document.getElementById('enhancedNoteProcessing').checked,
+                noteConfidenceThreshold: parseFloat(document.getElementById('noteConfidenceThreshold').value),
+                
+                // Enhanced Transcription parameters (2025)
+                transcriptionMethod: document.getElementById('transcriptionMethod').value,
+                enhancedQuantization: document.getElementById('enhancedQuantization').checked,
+                leftRightSplit: document.getElementById('leftRightSplit').checked,
+                pianoOptimized: document.getElementById('pianoOptimized').checked
+            };
+            // AI Arranger
+            params.aiEnabled = document.getElementById('aiEnabled').checked;
+            params.aiModel = document.getElementById('aiModel').value;
+            params.aiPrimerSource = document.getElementById('aiPrimerSource').value;
+            params.aiBars = parseInt(document.getElementById('aiBars').value) || 8;
+            params.aiTemperature = parseFloat(document.getElementById('aiTemperature').value) || 1.0;
+            params.aiBeamSize = parseInt(document.getElementById('aiBeamSize').value) || 1;
+            params.aiBlendMode = document.getElementById('aiBlendMode').value;
+            params.useGPU = document.getElementById('useGPU').checked;
+            params.aiCheckpoint = document.getElementById('aiCheckpoint').value || undefined;
+            // Context flags (if any uploaded for this song on server)
+            params.useContextTempo = document.getElementById('useContextTempo').checked;
+            params.useContextHarmony = document.getElementById('useContextHarmony').checked;
+            params.useContextIntro = document.getElementById('useContextIntro').checked;
+            params.contextIntroSeconds = parseInt(document.getElementById('contextIntroSeconds').value) || 0;
+            
+            try {
+                // Debug: Log parameters being sent
+                console.log('Sending parameters to server:', params);
+                
+                // Call the FastAPI backend
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(params)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => null);
+                    const errorMsg = errorData?.error || `HTTP ${response.status}: ${response.statusText}`;
+                    throw new Error(errorMsg);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    output.textContent = result.output;
+                    showStatus(`✅ Success! Generated ${result.noteCount} notes in ${result.phrases} phrases`, 'success');
+                    window.__lastEvents = result.events || [];
+                    window.__lastBpm = result.bpm || 120;
+                    window.__lastDownloadUrl = result.downloadUrl; // Store for preview
+                    const dl = document.getElementById('downloadLink');
+                    if (result.downloadUrl) dl.href = result.downloadUrl;
+                    document.getElementById('bpmInfo').textContent = `BPM: ${window.__lastBpm}`;
+                    drawPianoRoll(window.__lastEvents);
+                } else {
+                    output.textContent = 'Error: ' + result.error;
+                    showStatus('❌ Generation failed', 'error');
+                }
+                
+            } catch (error) {
+                output.textContent = 'Error connecting to backend. Please make sure the Python server is running.\n\nTo start the server, run:\npython piano_ui_server.py';
+                showStatus('❌ Connection error', 'error');
+            }
+            
+            btn.disabled = false;
+            btn.textContent = '🎹 Generate Piano Arrangement';
+        }
+
+        // Upload & prepare new song
+        async function uploadSong() {
+            const fileInput = document.getElementById('uploadInput');
+            const status = document.getElementById('uploadStatus');
+            if (!fileInput.files.length) {
+                status.textContent = 'Please choose an audio file';
+                return;
+            }
+            status.textContent = 'Uploading and preparing...';
+            const form = new FormData();
+            form.append('file', fileInput.files[0]);
+            try {
+                const res = await fetch('/api/upload', { method: 'POST', body: form });
+                const data = await res.json();
+                if (data.success) {
+                    status.textContent = 'Ready: ' + data.song;
+                    await loadSongs();
+                    document.getElementById('songSelect').value = data.song;
+                } else {
+                    status.textContent = 'Error: ' + data.error;
+                }
+            } catch (e) {
+                status.textContent = 'Upload failed';
+            }
+        }
+
+        // Upload context file
+        async function uploadContext() {
+            const fileInput = document.getElementById('contextFile');
+            const status = document.getElementById('contextStatus');
+            const song = document.getElementById('songSelect').value;
+            if (!song) { status.textContent = 'Select a song first'; return; }
+            if (!fileInput.files.length) { status.textContent = 'Choose a context file'; return; }
+            status.textContent = 'Uploading context...';
+            const form = new FormData();
+            form.append('song', song);
+            form.append('file', fileInput.files[0]);
+            try {
+                const res = await fetch('/api/upload-context', { method: 'POST', body: form });
+                const data = await res.json();
+                if (data.success) {
+                    status.textContent = 'Context uploaded';
+                } else {
+                    status.textContent = 'Error: ' + data.error;
+                }
+            } catch (e) {
+                status.textContent = 'Upload failed';
+            }
+        }
+
+        // Test Enhanced BPM Detection and Note Processing
+        async function testEnhancements() {
+            const songName = document.getElementById('songSelect').value;
+            if (!songName) {
+                showStatus('Please select a song first', 'error');
+                return;
+            }
+            
+            showStatus('Testing enhanced BPM detection...', 'processing');
+            
+            try {
+                const response = await fetch('/api/test-enhancements', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ song: songName })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayEnhancementResults(data.results);
+                    showStatus('Enhancement test completed', 'success');
+                } else {
+                    showStatus('Enhancement test failed: ' + data.error, 'error');
+                }
+            } catch (e) {
+                showStatus('Enhancement test error: ' + e.message, 'error');
+                console.error('Enhancement test error:', e);
+            }
+        }
+        
+        // Display enhancement test results
+        function displayEnhancementResults(results) {
+            const resultsDiv = document.getElementById('bpmDetectionResults');
+            const contentDiv = document.getElementById('bpmResultsContent');
+            
+            let html = '';
+            
+            if (results.bpm) {
+                html += `<div style="margin-bottom: 10px;">
+                    <strong>🎵 BPM Detection:</strong><br>
+                    <span style="font-size: 18px; color: #2c3e50;">${results.bpm.bpm.toFixed(1)} BPM</span>
+                    <span style="color: #7f8c8d;"> (confidence: ${results.bpm.confidence.toFixed(2)}, method: ${results.bpm.method})</span>
+                </div>`;
+                
+                if (results.bpm.all_estimates) {
+                    html += `<div style="margin-bottom: 10px;">
+                        <strong>All Estimates:</strong><br>`;
+                    results.bpm.all_estimates.forEach(([bpm, conf, method]) => {
+                        html += `<div style="margin-left: 10px; font-size: 12px;">
+                            ${method}: ${bpm.toFixed(1)} BPM (${conf.toFixed(2)})
+                        </div>`;
+                    });
+                    html += '</div>';
+                }
+            }
+            
+            if (results.notes) {
+                html += `<div style="margin-bottom: 10px;">
+                    <strong>🎼 Note Analysis:</strong><br>
+                    Original Notes: ${results.notes.original_count}<br>
+                    Enhanced Notes: ${results.notes.enhanced_count}<br>
+                    Improvement: ${((results.notes.enhanced_count / results.notes.original_count) * 100).toFixed(1)}% retention
+                </div>`;
+            }
+            
+            if (results.arrangement) {
+                html += `<div style="margin-bottom: 10px;">
+                    <strong>🎹 Arrangement Quality:</strong><br>
+                    Note Density: ${results.arrangement.note_density.toFixed(1)} notes/sec<br>
+                    Max Polyphony: ${results.arrangement.max_polyphony} notes<br>
+                    Playability Score: ${results.arrangement.playability_score.toFixed(1)}/10
+                </div>`;
+            }
+            
+            contentDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+
+        // Load songs list from server
+        async function loadSongs() {
+            try {
+                const res = await fetch('/api/songs');
+                const data = await res.json();
+                const sel = document.getElementById('songSelect');
+                sel.innerHTML = '';
+                (data.songs || []).forEach(song => {
+                    const opt = document.createElement('option');
+                    // Handle both old format (string) and new format (object)
+                    if (typeof song === 'string') {
+                        opt.value = song;
+                        opt.textContent = song;
+                    } else {
+                        opt.value = song.name;
+                        opt.textContent = `${song.name} (${song.stems.join(', ')})`;
+                    }
+                    sel.appendChild(opt);
+                });
+            } catch (e) {
+                console.warn('Failed to load songs', e);
+            }
+        }
+
+        // Global audio state
+        window.isPlaying = false;
+        window.useHighQuality = true;
+        
+        // Enhanced MIDI file preview with WebAudio synthesis
+        async function previewArrangement() {
+            const downloadUrl = window.__lastDownloadUrl;
+            const events = window.__lastEvents || [];
+            
+            if (!downloadUrl && !events.length) { 
+                showStatus('Generate first to preview', 'error'); 
+                return; 
+            }
+            
+            if (window.isPlaying) {
+                showStatus('Stop current playback first', 'error');
+                return;
+            }
+            
+            try {
+                if (events.length > 0) {
+                    window.isPlaying = true;
+                    document.getElementById('playBtn').textContent = '⏸ Playing...';
+                    document.getElementById('playBtn').disabled = true;
+                    
+                    const duration = parseInt(document.getElementById('previewDuration').value);
+                    const durationText = duration === 0 ? 'full song' : `${duration}s`;
+                    
+                    showStatus(`🎵 Starting MIDI preview (${durationText})...`, 'processing');
+                    await playMIDIEvents(events);
+                    showStatus(`▶ MIDI preview playing (${durationText})`, 'success');
+                } else {
+                    // Fallback: Open MIDI file
+                    showStatus('🎵 Opening MIDI file...', 'processing');
+                    window.open(downloadUrl, '_blank');
+                    showStatus('▶ MIDI file opened in new tab', 'success');
+                }
+            } catch (error) {
+                console.error('MIDI preview error:', error);
+                showStatus('❌ MIDI preview failed', 'error');
+                resetPlaybackUI();
+            }
+        }
+        
+        // Stop playback
+        function stopPlayback() {
+            if (window.currentPlayback) {
+                window.currentPlayback.forEach(node => {
+                    try { node.stop(); } catch(e) {}
+                });
+                window.currentPlayback = [];
+            }
+            resetPlaybackUI();
+            showStatus('⏹ Playback stopped', 'success');
+        }
+        
+        // Reset playback UI
+        function resetPlaybackUI() {
+            window.isPlaying = false;
+            document.getElementById('playBtn').textContent = '▶ Preview';
+            document.getElementById('playBtn').disabled = false;
+        }
+        
+        // Toggle audio quality
+        function toggleQuality() {
+            window.useHighQuality = !window.useHighQuality;
+            const btn = document.getElementById('qualityBtn');
+            if (window.useHighQuality) {
+                btn.textContent = '🎵 HQ Audio';
+                btn.style.background = '#27ae60';
+                showStatus('High quality audio enabled', 'success');
+            } else {
+                btn.textContent = '🔈 Standard';
+                btn.style.background = '#f39c12';
+                showStatus('Standard quality audio enabled', 'success');
+            }
+        }
+        
+        // Advanced 2025 WebAudio Piano Synthesis with realistic sound modeling
+        async function playMIDIEvents(events) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            window.audioContext = window.audioContext || new AudioCtx();
+            const ctx = window.audioContext;
+            
+            // Resume audio context if needed
+            if (ctx.state === 'suspended') {
+                await ctx.resume();
+            }
+            
+            // Stop any previous playback
+            if (window.currentPlayback) {
+                window.currentPlayback.forEach(node => {
+                    try { node.stop(); } catch(e) {}
+                });
+            }
+            window.currentPlayback = [];
+            
+            const now = ctx.currentTime;
+            const minStart = Math.min(...events.map(e => e.start));
+            
+            // Get preview duration from UI
+            const previewDurationSec = parseInt(document.getElementById('previewDuration').value);
+            const maxTimeMs = previewDurationSec === 0 ? 
+                Math.max(...events.map(e => e.start + e.duration)) : 
+                minStart + (previewDurationSec * 1000);
+            
+            const toPlay = events.filter(e => e.start <= maxTimeMs);
+            
+            // Get volume from UI
+            const volume = parseInt(document.getElementById('volumeSlider').value) / 100;
+            
+            // Create master compressor and reverb for realistic piano sound
+            const masterGain = ctx.createGain();
+            const compressor = ctx.createDynamicsCompressor();
+            const convolver = ctx.createConvolver();
+            const reverbGain = ctx.createGain();
+            const dryGain = ctx.createGain();
+            
+            // Configure compressor for piano dynamics
+            compressor.threshold.value = -24;
+            compressor.knee.value = 30;
+            compressor.ratio.value = 12;
+            compressor.attack.value = 0.003;
+            compressor.release.value = 0.25;
+            
+            // Create impulse response for reverb (simple room reverb)
+            const impulseBuffer = ctx.createBuffer(2, ctx.sampleRate * 2, ctx.sampleRate);
+            for (let channel = 0; channel < 2; channel++) {
+                const channelData = impulseBuffer.getChannelData(channel);
+                for (let i = 0; i < channelData.length; i++) {
+                    channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / channelData.length, 2);
+                }
+            }
+            convolver.buffer = impulseBuffer;
+            
+            // Set up signal chain: dry + wet reverb with volume control
+            dryGain.gain.value = 0.8;
+            reverbGain.gain.value = window.useHighQuality ? 0.3 : 0.1; // Less reverb in standard mode
+            masterGain.gain.value = volume * (window.useHighQuality ? 0.4 : 0.6); // Compensate for complexity
+            
+            masterGain.connect(compressor);
+            compressor.connect(dryGain);
+            compressor.connect(convolver);
+            convolver.connect(reverbGain);
+            dryGain.connect(ctx.destination);
+            reverbGain.connect(ctx.destination);
+            
+            // Advanced piano synthesis for each note with quality-dependent processing
+            toPlay.forEach(e => {
+                const startTime = now + (e.start - minStart) / 1000;
+                const duration = Math.max(0.1, Math.min(4.0, e.duration / 1000));
+                const frequency = 440 * Math.pow(2, (e.note - 69) / 12);
+                const velocity = (e.velocity || 64) / 127;
+                
+                // Create realistic piano voice with multiple components
+                if (window.useHighQuality) {
+                    createAdvancedPianoNote(ctx, masterGain, startTime, duration, frequency, velocity, e.note);
+                } else {
+                    createStandardPianoNote(ctx, masterGain, startTime, duration, frequency, velocity, e.note);
+                }
+            });
+            
+            // Auto-stop playback when complete and reset UI
+            const totalDuration = (maxTimeMs - minStart) / 1000;
+            setTimeout(() => {
+                if (window.isPlaying) {
+                    resetPlaybackUI();
+                    showStatus('🎵 Playback completed', 'success');
+                }
+            }, totalDuration * 1000 + 1000); // Add 1s buffer
+        }
+        
+        // Create advanced piano note with realistic harmonic structure and envelopes
+        function createAdvancedPianoNote(ctx, destination, startTime, duration, frequency, velocity, midiNote) {
+            const noteGain = ctx.createGain();
+            noteGain.connect(destination);
+            
+            // Piano harmonic series with realistic amplitudes and detuning
+            const harmonics = [
+                { ratio: 1.0, amp: 1.0, detune: 0 },           // Fundamental
+                { ratio: 2.0, amp: 0.6, detune: -1.2 },        // Octave (slightly flat)
+                { ratio: 3.0, amp: 0.4, detune: 2.0 },         // Perfect fifth
+                { ratio: 4.0, amp: 0.25, detune: -3.1 },       // Second octave
+                { ratio: 5.0, amp: 0.2, detune: -13.7 },       // Major third
+                { ratio: 6.0, amp: 0.15, detune: -15.6 },      // Perfect fifth (2nd octave)
+                { ratio: 7.0, amp: 0.1, detune: -31.2 },       // Minor seventh
+                { ratio: 8.0, amp: 0.08, detune: -35.0 }       // Third octave
+            ];
+            
+            // Note-dependent timbre adjustments
+            const lowNote = midiNote < 48;
+            const highNote = midiNote > 84;
+            const bassBoost = lowNote ? 1.4 : 1.0;
+            const trebleRoll = highNote ? 0.7 : 1.0;
+            
+            harmonics.forEach((harm, i) => {
+                const osc = ctx.createOscillator();
+                const harmGain = ctx.createGain();
+                const filter = ctx.createBiquadFilter();
+                
+                // Oscillator setup with slight detuning for realism
+                osc.type = 'triangle';
+                osc.frequency.value = frequency * harm.ratio;
+                osc.detune.value = harm.detune + (Math.random() - 0.5) * 2; // Slight random detune
+                
+                // Low-pass filter for natural rolloff
+                filter.type = 'lowpass';
+                filter.frequency.value = frequency * harm.ratio * 2.5;
+                filter.Q.value = 0.5;
+                
+                // Note-dependent amplitude scaling
+                let amplitude = harm.amp * velocity * bassBoost * trebleRoll;
+                if (i > 4) amplitude *= 0.5; // Reduce higher harmonics
+                
+                // Piano-like ADSR envelope with velocity sensitivity
+                const attackTime = 0.01 + (1 - velocity) * 0.02; // Softer = slower attack
+                const decayTime = 0.15 + velocity * 0.1;
+                const sustainLevel = 0.3 + velocity * 0.4;
+                const releaseTime = 0.8 + velocity * 0.5; // Louder = longer sustain
+                
+                harmGain.gain.setValueAtTime(0, startTime);
+                harmGain.gain.linearRampToValueAtTime(amplitude, startTime + attackTime);
+                harmGain.gain.exponentialRampToValueAtTime(amplitude * sustainLevel, startTime + attackTime + decayTime);
+                harmGain.gain.setValueAtTime(amplitude * sustainLevel, startTime + duration * 0.6);
+                harmGain.gain.exponentialRampToValueAtTime(0.001, startTime + duration + releaseTime);
+                
+                // Connect audio graph
+                osc.connect(filter);
+                filter.connect(harmGain);
+                harmGain.connect(noteGain);
+                
+                // Schedule playback
+                osc.start(startTime);
+                osc.stop(startTime + duration + releaseTime);
+                
+                // Store reference for cleanup
+                window.currentPlayback = window.currentPlayback || [];
+                window.currentPlayback.push(osc);
+            });
+            
+            // Add subtle string resonance for realism (sympathetic vibrations)
+            if (Math.random() < 0.3) { // Only some notes get resonance
+                const resonanceOsc = ctx.createOscillator();
+                const resonanceGain = ctx.createGain();
+                const resonanceFilter = ctx.createBiquadFilter();
+                
+                resonanceOsc.type = 'sine';
+                resonanceOsc.frequency.value = frequency * 0.5; // Sub-harmonic
+                resonanceFilter.type = 'bandpass';
+                resonanceFilter.frequency.value = frequency * 0.5;
+                resonanceFilter.Q.value = 5;
+                
+                const resonanceAmp = velocity * 0.05;
+                resonanceGain.gain.setValueAtTime(0, startTime);
+                resonanceGain.gain.linearRampToValueAtTime(resonanceAmp, startTime + 0.1);
+                resonanceGain.gain.exponentialRampToValueAtTime(0.001, startTime + duration + 1);
+                
+                resonanceOsc.connect(resonanceFilter);
+                resonanceFilter.connect(resonanceGain);
+                resonanceGain.connect(noteGain);
+                
+                resonanceOsc.start(startTime + 0.05);
+                resonanceOsc.stop(startTime + duration + 1);
+                
+                window.currentPlayback.push(resonanceOsc);
+            }
+        }
+        
+        // Create standard quality piano note for better performance
+        function createStandardPianoNote(ctx, destination, startTime, duration, frequency, velocity, midiNote) {
+            const noteGain = ctx.createGain();
+            noteGain.connect(destination);
+            
+            // Simpler harmonic series for performance
+            const harmonics = [
+                { ratio: 1.0, amp: 1.0 },        // Fundamental
+                { ratio: 2.0, amp: 0.4 },        // Octave
+                { ratio: 3.0, amp: 0.2 },        // Perfect fifth
+                { ratio: 4.0, amp: 0.1 }         // Second octave
+            ];
+            
+            harmonics.forEach((harm, i) => {
+                const osc = ctx.createOscillator();
+                const harmGain = ctx.createGain();
+                
+                osc.type = 'triangle';
+                osc.frequency.value = frequency * harm.ratio;
+                
+                const amplitude = harm.amp * velocity * 0.5;
+                
+                // Simple ADSR envelope
+                const attackTime = 0.02;
+                const decayTime = 0.2;
+                const sustainLevel = 0.4;
+                const releaseTime = 0.6;
+                
+                harmGain.gain.setValueAtTime(0, startTime);
+                harmGain.gain.linearRampToValueAtTime(amplitude, startTime + attackTime);
+                harmGain.gain.exponentialRampToValueAtTime(amplitude * sustainLevel, startTime + attackTime + decayTime);
+                harmGain.gain.setValueAtTime(amplitude * sustainLevel, startTime + duration * 0.6);
+                harmGain.gain.exponentialRampToValueAtTime(0.001, startTime + duration + releaseTime);
+                
+                osc.connect(harmGain);
+                harmGain.connect(noteGain);
+                
+                osc.start(startTime);
+                osc.stop(startTime + duration + releaseTime);
+                
+                window.currentPlayback = window.currentPlayback || [];
+                window.currentPlayback.push(osc);
+            });
+        }
+
+        // Piano roll visualization
+        function drawPianoRoll(events) {
+            const canvas = document.getElementById('pianoRoll');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            if (!events || !events.length) return;
+            const minStart = Math.min(...events.map(e => e.start));
+            const maxEnd = Math.max(...events.map(e => e.start + e.duration));
+            const minNote = Math.min(...events.map(e => e.note));
+            const maxNote = Math.max(...events.map(e => e.note));
+            const pad = 10;
+            const timeScale = (canvas.width - pad*2) / (maxEnd - minStart || 1);
+            const noteScale = (canvas.height - pad*2) / (maxNote - minNote + 1);
+            ctx.fillStyle = '#2980b9';
+            events.forEach(e => {
+                const x = pad + (e.start - minStart) * timeScale;
+                const w = Math.max(1, e.duration * timeScale);
+                const y = canvas.height - pad - (e.note - minNote + 1) * noteScale;
+                const h = Math.max(2, noteScale - 1);
+                ctx.fillRect(x, y, w, h);
+            });
+            // axes
+            ctx.strokeStyle = '#bdc3c7';
+            ctx.beginPath();
+            ctx.moveTo(pad, pad);
+            ctx.lineTo(pad, canvas.height-pad);
+            ctx.lineTo(canvas.width-pad, canvas.height-pad);
+            ctx.stroke();
+        }
+
+        // Volume slider handler
+        document.getElementById('volumeSlider').oninput = function() {
+            const volume = this.value;
+            document.getElementById('volumeDisplay').textContent = volume + '%';
+            
+            // Update master gain if audio is playing
+            if (window.audioContext && window.currentPlayback && window.currentPlayback.length > 0) {
+                // Note: Real-time volume adjustment would require more complex architecture
+                // For now, this will apply to next playback
+            }
+        };
+
+        // Initialize
+        updateValueDisplays();
+        loadPreset('balanced');
+        loadSongs();
+        document.getElementById('volumeSlider').oninput(); // Initialize volume display
+
+        function toggleStemSelect() {
+            const mode = (document.querySelector('input[name="arrMode"]:checked')||{}).value;
+            const single = mode === 'single';
+            const ss = document.getElementById('stemSelect');
+            ss.disabled = !single;
+        }
+    </script>
+</body>
+</html>
